@@ -12,7 +12,7 @@
       "name": "vinyl-reel",
       "source": "./plugins/vinyl-reel",
       "description": "Creates polished 9:16 vinyl unboxing reels (YouTube Shorts & Instagram Reels) from raw footage and your own recorded voiceover",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "author": {
         "name": "Пан Володимир"
       },
@@ -23,7 +23,7 @@
       "name": "discography-reel",
       "source": "./plugins/discography-reel",
       "description": "Creates a 9:16 discography reel showcasing a band's full studio discography from per-album video clips and audio samples",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Пан Володимир"
       },

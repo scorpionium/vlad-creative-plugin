@@ -42,7 +42,7 @@ Or describe what you want — "make a discography reel for Drudkh" — and the s
 | File | Description |
 |------|-------------|
 | `BANDNAME_Discography_YEARFIRST-YEARLAST.mp4` | Clean version |
-| `BANDNAME_Discography_YEARFIRST-YEARLAST_yt.mp4` | YouTube Shorts with subscribe overlay at t=30s |
+| `BANDNAME_Discography_YEARFIRST-YEARLAST_yt.mp4` | YouTube Shorts with subscribe overlay at t=20s |
 | `BANDNAME_Discography_metadata.md` | EN + UA titles, album list, hashtags |
 
 ## Requirements

@@ -230,10 +230,10 @@ ffmpeg -y -i video_silent.mp4 -i .work/mixed_audio_en.wav \
 
 ## Phase 5: Export & Metadata
 
-### 5a. YouTube Shorts Version — English (Subscribe overlay at 30s)
+### 5a. YouTube Shorts Version — English (Subscribe overlay at 20s)
 
-Overlay the subscribe animation starting at exactly the **30-second mark**, playing **once**
-(no looping). Use `-itsoffset 30` to delay the subscribe animation input by 30 seconds:
+Overlay the subscribe animation starting at exactly the **20-second mark**, playing **once**
+(no looping). Use `-itsoffset 20` to delay the subscribe animation input by 20 seconds:
 
 ```bash
 # Find subscribe animation (working folder first, then skill assets)
@@ -242,7 +242,7 @@ SUBSCRIBE="<working-folder>/subscribe_btn_animation_small.mp4"
 
 ffmpeg -y \
   -i assembled_en.mp4 \
-  -itsoffset 30 -i "$SUBSCRIBE" \
+  -itsoffset 20 -i "$SUBSCRIBE" \
   -filter_complex " \
     [1:v]chromakey=0x00FF00:0.3:0.1,scale=1080:-1[sub]; \
     [0:v][sub]overlay=(W-w)/2:(H-h)/2:eof_action=pass[out]" \
@@ -252,7 +252,7 @@ ffmpeg -y \
   "<Album>_Reel.mp4"
 ```
 
-The `-itsoffset 30` delays the animation so it appears at t=30 in the output video.
+The `-itsoffset 20` delays the animation so it appears at t=20 in the output video.
 It plays once through and stops naturally — no looping.
 
 ### 5b. Instagram Version — English (clean, no subscribe)

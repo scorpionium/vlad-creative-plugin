@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed (`vinyl-reel`) — 0.1.6
+- Subscribe overlay now appears at t=20s (was t=30s)
+
+### Changed (`discography-reel`) — 0.1.2
+- Subscribe overlay now appears at t=20s (was t=30s); skip-condition updated to `total_sec <= 20`
+
 ## [0.1.5] – 2026-02-28
 
 ### Changed (`vinyl-reel`)

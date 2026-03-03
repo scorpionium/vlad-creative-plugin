@@ -9,7 +9,7 @@ Proven filter chains for assembling multi-album discography reels. All outputs a
 3. [Segment Build — Video + Audio Trimmed Together](#segment-build--video--audio-trimmed-together)
 4. [Short Clip Padding](#short-clip-padding)
 5. [Crossfade — Chained xfade + acrossfade](#crossfade--chained-xfade--acrossfade)
-6. [Subscribe Overlay (Chromakey at t=30s)](#subscribe-overlay-chromakey-at-t30s)
+6. [Subscribe Overlay (Chromakey at t=20s)](#subscribe-overlay-chromakey-at-t20s)
 7. [Standard Encoding Settings](#standard-encoding-settings)
 
 ---
@@ -195,9 +195,9 @@ This is expected and correct — each 0.5s crossfade overlaps adjacent segments 
 
 ---
 
-## Subscribe Overlay (Chromakey at t=30s)
+## Subscribe Overlay (Chromakey at t=20s)
 
-Overlay the green-screen subscribe animation starting at exactly the 30-second mark.
+Overlay the green-screen subscribe animation starting at exactly the 20-second mark.
 The animation plays once through and stops naturally (no looping).
 
 ```bash
@@ -208,7 +208,7 @@ SUBSCRIBE="<WORK_DIR>/subscribe_btn_animation_small.mp4"
 
 ffmpeg -y \
   -i ".work/assembled.mp4" \
-  -itsoffset 30 -i "$SUBSCRIBE" \
+  -itsoffset 20 -i "$SUBSCRIBE" \
   -filter_complex " \
     [1:v]chromakey=0x00FF00:0.3:0.1,scale=1080:-1[sub]; \
     [0:v][sub]overlay=(W-w)/2:(H-h)/2[out]" \
@@ -219,13 +219,13 @@ ffmpeg -y \
 ```
 
 Key settings:
-- `-itsoffset 30` — delays the subscribe animation input by 30 seconds relative to the main video
+- `-itsoffset 20` — delays the subscribe animation input by 20 seconds relative to the main video
 - `chromakey=0x00FF00:0.3:0.1` — removes green background (similarity=0.3, blend=0.1)
 - `scale=1080:-1` — full frame width, preserves aspect ratio
 - `overlay=(W-w)/2:(H-h)/2` — centered on frame
 - `-c:a copy` — audio stream passed through without re-encode
 
-If `total_sec <= 30`, skip this export — the animation would appear after the video ends.
+If `total_sec <= 20`, skip this export — the animation would appear after the video ends.
 
 ---
 

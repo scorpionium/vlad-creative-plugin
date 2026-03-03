@@ -321,7 +321,7 @@ cp "<WORK>/assembled.mp4" \
 
 Where `<BAND_SLUG>` = band name with spaces replaced by underscores, special chars stripped.
 
-### 4e. YouTube Shorts Export (subscribe overlay at t=30s)
+### 4e. YouTube Shorts Export (subscribe overlay at t=20s)
 
 Locate the subscribe animation:
 ```bash
@@ -330,11 +330,11 @@ SUBSCRIBE="<skill-path>/assets/subscribe_btn_animation_small.mp4"
 
 The `<skill-path>` is the directory containing this SKILL.md file.
 
-Apply overlay starting at t=30s using `-itsoffset 30`:
+Apply overlay starting at t=20s using `-itsoffset 20`:
 ```bash
 ffmpeg -y \
   -i "<WORK>/assembled.mp4" \
-  -itsoffset 30 -i "$SUBSCRIBE" \
+  -itsoffset 20 -i "$SUBSCRIBE" \
   -filter_complex " \
     [1:v]chromakey=0x00FF00:0.3:0.1,scale=1080:-1[sub]; \
     [0:v][sub]overlay=(W-w)/2:(H-h)/2[out]" \
@@ -344,7 +344,7 @@ ffmpeg -y \
   "<WORK_DIR>/<BAND_SLUG>_Discography_<YEAR_FIRST>-<YEAR_LAST>_yt.mp4"
 ```
 
-If `total_sec <= 30`, skip the subscribe overlay (the animation would not appear within
+If `total_sec <= 20`, skip the subscribe overlay (the animation would not appear within
 the video duration). Mention this to the user.
 
 ### 4f. Generate Metadata
@@ -406,7 +406,7 @@ After Phase 4 completes, tell the user:
 Done! Outputs saved to: <WORK_DIR>/
 
   <BAND_SLUG>_Discography_<YEAR_FIRST>-<YEAR_LAST>.mp4     — clean version
-  <BAND_SLUG>_Discography_<YEAR_FIRST>-<YEAR_LAST>_yt.mp4  — YouTube Shorts (subscribe at t=30s)
+  <BAND_SLUG>_Discography_<YEAR_FIRST>-<YEAR_LAST>_yt.mp4  — YouTube Shorts (subscribe at t=20s)
   <BAND_SLUG>_Discography_metadata.md                       — EN + UA titles and descriptions
 ```
 
@@ -426,4 +426,4 @@ Done! Outputs saved to: <WORK_DIR>/
   is missing, skip the `_yt.mp4` export and tell the user — the asset should be bundled
   with the plugin.
 - **N=1 (band with only 1 studio album):** No crossfade. Copy segment_01.mp4 to assembled.mp4.
-  Subscribe overlay still applied if total_sec > 30.
+  Subscribe overlay still applied if total_sec > 20.

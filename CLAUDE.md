@@ -80,7 +80,7 @@ Album Name/
 
 | File | Description |
 |------|-------------|
-| `*_yt_shorts_en.mp4` | YouTube Shorts (EN) with subscribe overlay at t=30s |
+| `*_yt_shorts_en.mp4` | YouTube Shorts (EN) with subscribe overlay at t=20s |
 | `*_instagram_en.mp4` | Instagram Reels (EN), clean |
 | `*_Audio_UA.m4a` | Ukrainian audio track — upload via YouTube Subtitles → Add language |
 | `*_metadata.md` | EN + UA titles, descriptions, hashtags |

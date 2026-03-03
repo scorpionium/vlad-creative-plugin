@@ -29,7 +29,7 @@ Album Name/
 
 | File | Description |
 |------|-------------|
-| `<Album>_Reel.mp4` | YouTube Shorts (EN) with subscribe overlay at t=30s |
+| `<Album>_Reel.mp4` | YouTube Shorts (EN) with subscribe overlay at t=20s |
 | `<Album>_Reel_Clean.mp4` | Instagram Reels (EN), no overlay |
 | `<Album>_Audio_UA.m4a` | Ukrainian audio track — upload via YouTube → Subtitles → Add language |
 | `youtube_metadata.md` | EN + UA titles, descriptions, hashtags |
