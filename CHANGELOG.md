@@ -8,6 +8,14 @@
 ### Changed (`discography-reel`) — 0.1.2
 - Subscribe overlay now appears at t=20s (was t=30s); skip-condition updated to `total_sec <= 20`
 
+## [0.2.0] – 2026-03-16
+
+### Changed (`discography-reel`) — 0.2.0
+- **Two videos per album**: each album section is now composed of two sub-clips — `1_cover.*` (cover art footage, capped at 4 s) and `2_turntable.*` (LP on turntable, remainder of the album's time slot). Phase 2 instructs the user to drop both files and collects per-album cover start offsets before assembly begins.
+- `scan_assets.py`: now validates exactly 2 video files per album folder and reports them as `cover_video` / `turntable_video` (alphabetical sort) with individual durations.
+- **Mixed crossfade durations**: within-album (cover→turntable) transitions use 0.3 s; album-boundary transitions keep 0.5 s. Filter complex now covers `2N-1` transitions across `2N` segments.
+- **Audio fade-out**: clean export (Step 4d) applies a 2-second `afade=t=out` over the final 2 seconds of the assembled video. YouTube Shorts export inherits the fade via `-c:a copy` from the 4d output.
+
 ## [0.1.5] – 2026-02-28
 
 ### Changed (`vinyl-reel`)

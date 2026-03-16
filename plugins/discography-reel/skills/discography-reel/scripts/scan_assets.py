@@ -3,7 +3,7 @@
 Validate a discography working directory before assembly.
 
 Expects subdirectories matching NN_* pattern, each with:
-  video/ — exactly 1 video file
+  video/ — exactly 2 video files (sorted alphabetically: cover_video, turntable_video)
   audio/ — exactly 1 audio file
 
 Usage: python3 scan_assets.py <working-folder>
@@ -93,35 +93,49 @@ def main():
         album_entry = {
             "album_dir": album_name,
             "path": str(album_dir),
-            "video_file": None,
+            "cover_video": None,
+            "turntable_video": None,
             "audio_file": None,
-            "video_duration": None,
+            "cover_video_duration": None,
+            "turntable_video_duration": None,
             "audio_duration": None,
             "valid": True
         }
 
-        # Check video/ folder
+        # Check video/ folder — expects exactly 2 files (alphabetical: cover, turntable)
         if not video_folder.exists():
             errors.append(f"{album_name}: missing video/ subfolder")
             album_entry["valid"] = False
         else:
             video_files = find_files_by_extension(video_folder, VIDEO_EXTENSIONS)
             if len(video_files) == 0:
-                errors.append(f"{album_name}/video/: no video file found (accepted: {', '.join(sorted(VIDEO_EXTENSIONS))})")
+                errors.append(f"{album_name}/video/: no video files found (accepted: {', '.join(sorted(VIDEO_EXTENSIONS))})")
                 album_entry["valid"] = False
-            elif len(video_files) > 1:
+            elif len(video_files) == 1:
                 names = ", ".join(f.name for f in video_files)
-                errors.append(f"{album_name}/video/: expected 1 video file, found {len(video_files)}: {names}")
+                errors.append(f"{album_name}/video/: expected 2 video files (1_cover.* and 2_turntable.*), found 1: {names}")
+                album_entry["valid"] = False
+            elif len(video_files) > 2:
+                names = ", ".join(f.name for f in video_files)
+                errors.append(f"{album_name}/video/: expected 2 video files, found {len(video_files)}: {names}")
                 album_entry["valid"] = False
             else:
-                vf = video_files[0]
-                duration = get_duration(vf)
-                if duration is None:
-                    errors.append(f"{album_name}/video/{vf.name}: ffprobe could not read file")
+                # Exactly 2 files: sorted alphabetically → index 0 = cover, index 1 = turntable
+                cover_f, turntable_f = video_files[0], video_files[1]
+                cover_dur = get_duration(cover_f)
+                turntable_dur = get_duration(turntable_f)
+                if cover_dur is None:
+                    errors.append(f"{album_name}/video/{cover_f.name}: ffprobe could not read file")
                     album_entry["valid"] = False
                 else:
-                    album_entry["video_file"] = str(vf)
-                    album_entry["video_duration"] = round(duration, 2)
+                    album_entry["cover_video"] = str(cover_f)
+                    album_entry["cover_video_duration"] = round(cover_dur, 2)
+                if turntable_dur is None:
+                    errors.append(f"{album_name}/video/{turntable_f.name}: ffprobe could not read file")
+                    album_entry["valid"] = False
+                else:
+                    album_entry["turntable_video"] = str(turntable_f)
+                    album_entry["turntable_video_duration"] = round(turntable_dur, 2)
 
         # Check audio/ folder
         if not audio_folder.exists():

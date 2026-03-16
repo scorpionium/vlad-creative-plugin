@@ -23,7 +23,7 @@
       "name": "discography-reel",
       "source": "./plugins/discography-reel",
       "description": "Creates a 9:16 discography reel showcasing a band's full studio discography from per-album video clips and audio samples",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "author": {
         "name": "Пан Володимир"
       },

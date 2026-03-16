@@ -1,6 +1,6 @@
 {
   "name": "discography-reel",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Creates a ≤59s 9:16 discography reel showcasing a band's full studio discography from per-album video clips and audio samples",
   "author": {
     "name": "Пан Володимир",

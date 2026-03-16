@@ -139,7 +139,7 @@ For each album i (1…N), create two subfolders. Use the naming convention:
 ```
 <Band Name> Discography/
 ├── 01_<AlbumName>_(<Year>)/
-│   ├── video/
+│   ├── video/          ← drop 1_cover.<ext> AND 2_turntable.<ext> here
 │   └── audio/
 ├── 02_<AlbumName>_(<Year>)/
 │   ├── video/
@@ -149,24 +149,51 @@ For each album i (1…N), create two subfolders. Use the naming convention:
 
 Show the complete folder tree to the user.
 
-### PAUSE
+### PAUSE — Step 1: Populate asset folders
 
 Tell the user:
 
-"Asset folders are ready. Please drop **exactly one video clip** and **exactly one audio sample**
-into each album's `video/` and `audio/` subfolder respectively.
+"Asset folders are ready. Please drop **exactly two video clips** and **exactly one audio sample**
+into each album's subfolders:
+
+- `video/1_cover.<ext>` — cover art footage for that album (zoom-pan, static cover shot, etc.)
+- `video/2_turntable.<ext>` — LP spinning on the turntable
+- `audio/<anything>.<ext>` — audio sample (one file)
 
 Video formats accepted: `.mp4 .mov .avi .mkv .m4v`
 Audio formats accepted: `.m4a .mp3 .wav .aac .flac .ogg`
 
-The video clip should be representative footage for that album (live clip, vinyl shot, cover
-art pan, etc.). For the audio sample, I suggested a track for each album above (♪) — pick a
-file that starts at or near the catchy hook so the best seconds land within your section window.
-You are free to use any track you like.
+The files are sorted alphabetically, so `1_cover` will always be the cover sub-clip and
+`2_turntable` will always be the turntable sub-clip.
+
+For the audio sample, I suggested a track for each album above (♪) — pick a file that starts
+at or near the catchy hook so the best seconds land within your section window.
 
 Confirm here when all folders are populated."
 
 **Wait for the user's confirmation before continuing.**
+
+### PAUSE — Step 2: Cover clip start offsets
+
+After the user confirms assets are in place, show this table and ask for offsets:
+
+"Thanks! One more thing before I start — I need to know **at what timestamp (in seconds)
+to begin the 4-second excerpt** from each cover clip. Reply with a comma-separated list of
+offsets in album order (e.g. `0, 2, 5, 0`). Leave blank or use `0` for any album where the
+clip should start from the beginning.
+
+| # | Album | Cover video |
+|---|-------|-------------|
+| 1 | <Album 1 name> (<Year>) | `1_cover.*` |
+| 2 | <Album 2 name> (<Year>) | `1_cover.*` |
+...
+
+Cover offsets (seconds, comma-separated):"
+
+**Wait for the user's reply.** Parse the offsets into a list `cover_offsets[1..N]`.
+Defaults to `0` for any album left blank or not provided.
+
+**Continue to Phase 3 once offsets are received.**
 
 ---
 
@@ -198,11 +225,14 @@ Variables established in earlier phases:
 - `BAND` — band name (ALL CAPS for metadata, original case for paths)
 - `N` — number of albums
 - `section_sec` — integer seconds per album
+- `cover_sec` — `min(4, section_sec)` — duration of each cover sub-clip
+- `turntable_sec` — `section_sec - cover_sec` — duration of each turntable sub-clip
+- `cover_offsets[1..N]` — per-album start offset in seconds for cover clip (default 0)
 - `YEAR_FIRST` — year of album 1
 - `YEAR_LAST` — year of album N
 - `WORK_DIR` — `<Band Name> Discography`
 - `WORK` — `<WORK_DIR>/.work` (create if needed)
-- `SUBSCRIBE` — path to subscribe animation (see 4d)
+- `SUBSCRIBE` — path to subscribe animation (see 4e)
 
 ```bash
 mkdir -p "$WORK_DIR/.work"
@@ -223,13 +253,21 @@ Use the first font found. Fallback order:
 
 ### 4b. Build Per-Album Segments
 
-For each album i (1…N), build a self-contained segment with video scaled/padded to portrait,
-album name + year text overlay at the top:
+Each album i produces **two sub-clips** (`a` = cover, `b` = turntable). The audio file is
+trimmed to match each sub-clip's duration.
 
+Compute per-album:
+```
+cover_sec      = min(4, section_sec)
+turntable_sec  = section_sec - cover_sec
+cover_offset_i = cover_offsets[i]   # from Phase 2 Step 2
+```
+
+**Sub-clip A — cover (`segment_<NN>a.mp4`):**
 ```bash
 ffmpeg -y \
-  -ss 0 -t <section_sec> -i "<video_file>" \
-  -ss 0 -t <section_sec> -i "<audio_file>" \
+  -ss <cover_offset_i> -t <cover_sec> -i "<cover_video_file>" \
+  -ss 0                -t <cover_sec> -i "<audio_file>" \
   -vf "scale=1080:1920:force_original_aspect_ratio=decrease,
        pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black,
        drawtext=fontfile=<bold_font>:\
@@ -238,73 +276,93 @@ ffmpeg -y \
          x=(w-text_w)/2:y=60:\
          box=1:boxcolor=black@0.5:boxborderw=12:\
          shadowcolor=black@0.6:shadowx=2:shadowy=2" \
-  -af "apad,atrim=0:<section_sec>,asetpts=PTS-STARTPTS" \
+  -af "apad,atrim=0:<cover_sec>,asetpts=PTS-STARTPTS" \
   -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p -r 30 \
   -c:a aac -b:a 192k \
-  "<WORK>/segment_<NN>.mp4"
+  "<WORK>/segment_<NN>a.mp4"
+```
+
+**Sub-clip B — turntable (`segment_<NN>b.mp4`):**
+```bash
+ffmpeg -y \
+  -ss 0 -t <turntable_sec> -i "<turntable_video_file>" \
+  -ss <cover_sec> -t <turntable_sec> -i "<audio_file>" \
+  -vf "scale=1080:1920:force_original_aspect_ratio=decrease,
+       pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black,
+       drawtext=fontfile=<bold_font>:\
+         text='<Album Name> (<Year>)':\
+         fontcolor=white:fontsize=40:\
+         x=(w-text_w)/2:y=60:\
+         box=1:boxcolor=black@0.5:boxborderw=12:\
+         shadowcolor=black@0.6:shadowx=2:shadowy=2" \
+  -af "apad,atrim=0:<turntable_sec>,asetpts=PTS-STARTPTS" \
+  -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p -r 30 \
+  -c:a aac -b:a 192k \
+  "<WORK>/segment_<NN>b.mp4"
 ```
 
 Notes:
-- The text overlay is at `y=60` (top of frame with padding) with a semi-transparent black
-  box background strip for legibility.
-- `-ss 0 -t <section_sec>` before each `-i` trims at the demuxer level (fast, no re-decode
-  for finding the start). For sources shorter than `section_sec`, `apad` fills audio and
-  `tpad=stop_mode=clone` fills video — add `tpad` to `-vf` only if the source is shorter:
-  ```
-  tpad=stop_mode=clone:stop_duration=<extra_sec>
-  ```
-  Check source duration from the scan output to determine if padding is needed.
+- This produces `2N` segments total: `segment_01a.mp4`, `segment_01b.mp4`, `segment_02a.mp4`, …
+- `-ss <cover_offset_i>` on the cover input seeks to the user-specified start offset (fast
+  demuxer seek). For sources shorter than `cover_sec` after the offset, add `tpad=stop_mode=clone`
+  to `-vf` and `apad` to `-af` (already present).
+- For the turntable sub-clip, `-ss <cover_sec>` on the audio input continues where cover left off
+  so the audio plays continuously across both sub-clips.
+- If `turntable_sec == 0` (i.e. `section_sec <= 4`), skip sub-clip B; only sub-clip A exists
+  for that album. Adjust the segment list and transition chain accordingly.
 - Escape special characters in album names: apostrophes → `'\''`, colons → `\:`.
 
 ### 4c. Concatenate Segments with Crossfades
 
-Use chained `xfade` + `acrossfade` filter_complex for smooth transitions between segments.
+Use chained `xfade` + `acrossfade` filter_complex for smooth transitions between all `2N`
+segments (`segment_01a`, `segment_01b`, `segment_02a`, …).
 
-**Crossfade duration:** 0.5 seconds per transition.
+**Crossfade durations:**
+- **Within-album** (A→B, i.e. cover→turntable): `0.3s`
+- **Album-boundary** (B→A, i.e. turntable of album i → cover of album i+1): `0.5s`
 
-**Offset formula for transition i (0-indexed, i=0 is first transition between seg 0 and seg 1):**
+**Segment sequence (0-indexed):** `[01a, 01b, 02a, 02b, …, NNa, NNb]`
+- Even-indexed transitions (0, 2, 4, …) are within-album: `x = 0.3`
+- Odd-indexed transitions (1, 3, 5, …) are album-boundary: `x = 0.5`
+
+**Segment durations:** `d[2k] = cover_sec`, `d[2k+1] = turntable_sec` (for album k+1)
+
+**Offset formula** (the offsets must be strictly increasing and in output-timeline seconds):
 ```
-O_i = (i + 1) * section_sec - (i + 1) * 0.5 - 0.5
+O[0] = d[0] - x[0]
+O[i] = O[i-1] + (d[i] - x[i-1]) - x[i]    for i >= 1
+     = sum(d[0..i]) - sum(x[0..i])
 ```
 
-Simplified: `O_0 = section_sec - 1.0`, `O_1 = 2*section_sec - 1.5`, etc.
+Compute all offsets before writing the filter_complex. Round to 2 decimal places.
 
-Build the filter_complex dynamically based on N:
-
-For N=3 (example with 2 transitions):
+Build the filter_complex dynamically. Example for N=2 albums (4 segments, 3 transitions):
 ```
+# segments: 01a(cover_sec), 01b(turntable_sec), 02a(cover_sec), 02b(turntable_sec)
+# transitions: 0=within(0.3), 1=boundary(0.5), 2=within(0.3)
 -filter_complex "
-  [0:v][1:v]xfade=transition=fade:duration=0.5:offset=<O0>[v01];
-  [v01][2:v]xfade=transition=fade:duration=0.5:offset=<O1>[vout];
-  [0:a][1:a]acrossfade=d=0.5:c1=tri:c2=tri[a01];
-  [a01][2:a]acrossfade=d=0.5:c1=tri:c2=tri[aout]
+  [0:v][1:v]xfade=transition=fade:duration=0.3:offset=<O0>[v01];
+  [v01][2:v]xfade=transition=fade:duration=0.5:offset=<O1>[v02];
+  [v02][3:v]xfade=transition=fade:duration=0.3:offset=<O2>[vout];
+  [0:a][1:a]acrossfade=d=0.3:c1=tri:c2=tri[a01];
+  [a01][2:a]acrossfade=d=0.5:c1=tri:c2=tri[a02];
+  [a02][3:a]acrossfade=d=0.3:c1=tri:c2=tri[aout]
 " -map "[vout]" -map "[aout]"
 ```
 
-General pattern for N segments (N-1 transitions):
-```
-# Video chain:
-[0:v][1:v]xfade=transition=fade:duration=0.5:offset=<O0>[v01];
-[v01][2:v]xfade=transition=fade:duration=0.5:offset=<O1>[v02];
-...
-[v(N-2)](N-1):v]xfade=transition=fade:duration=0.5:offset=<O(N-2)>[vout];
-
-# Audio chain:
-[0:a][1:a]acrossfade=d=0.5:c1=tri:c2=tri[a01];
-[a01][2:a]acrossfade=d=0.5:c1=tri:c2=tri[a02];
-...
-[a(N-2)][N-1):a]acrossfade=d=0.5:c1=tri:c2=tri[aout];
-```
-
-**Special case N=1:** No crossfade needed — copy segment directly to assembled.mp4.
+**Special cases:**
+- If `turntable_sec == 0` for some albums, those albums have only one segment (sub-clip A).
+  Adjust the segment list and transition types accordingly.
+- If there is only 1 segment total: no crossfade — copy segment directly to assembled.mp4.
 
 Full assemble command:
 ```bash
 ffmpeg -y \
-  -i "<WORK>/segment_01.mp4" \
-  -i "<WORK>/segment_02.mp4" \
+  -i "<WORK>/segment_01a.mp4" \
+  -i "<WORK>/segment_01b.mp4" \
+  -i "<WORK>/segment_02a.mp4" \
+  -i "<WORK>/segment_02b.mp4" \
   ... \
-  -i "<WORK>/segment_NN.mp4" \
   -filter_complex "<generated_filter_complex>" \
   -map "[vout]" -map "[aout]" \
   -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p -r 30 \
@@ -312,16 +370,31 @@ ffmpeg -y \
   "<WORK>/assembled.mp4"
 ```
 
-### 4d. Clean Export
+### 4d. Clean Export with Audio Fade-Out
 
+Compute the fade-out start:
+```
+fade_start = total_sec - 2       (if total_sec >= 4)
+fade_dur   = 2
+# fallback: if total_sec < 4, use fade_start=0, fade_dur=total_sec
+```
+
+Re-encode assembled.mp4 applying the fade-out to the audio:
 ```bash
-cp "<WORK>/assembled.mp4" \
-   "<WORK_DIR>/<BAND_SLUG>_Discography_<YEAR_FIRST>-<YEAR_LAST>.mp4"
+ffmpeg -y \
+  -i "<WORK>/assembled.mp4" \
+  -af "afade=t=out:st=<fade_start>:d=<fade_dur>" \
+  -c:v copy \
+  -c:a aac -b:a 192k \
+  "<WORK_DIR>/<BAND_SLUG>_Discography_<YEAR_FIRST>-<YEAR_LAST>.mp4"
 ```
 
 Where `<BAND_SLUG>` = band name with spaces replaced by underscores, special chars stripped.
 
 ### 4e. YouTube Shorts Export (subscribe overlay at t=20s)
+
+Read the audio fade-out from the 4d output (not assembled.mp4 directly) so the fade is
+inherited automatically via `-c:a copy`.
 
 Locate the subscribe animation:
 ```bash
@@ -333,7 +406,7 @@ The `<skill-path>` is the directory containing this SKILL.md file.
 Apply overlay starting at t=20s using `-itsoffset 20`:
 ```bash
 ffmpeg -y \
-  -i "<WORK>/assembled.mp4" \
+  -i "<WORK_DIR>/<BAND_SLUG>_Discography_<YEAR_FIRST>-<YEAR_LAST>.mp4" \
   -itsoffset 20 -i "$SUBSCRIBE" \
   -filter_complex " \
     [1:v]chromakey=0x00FF00:0.3:0.1,scale=1080:-1[sub]; \
@@ -425,5 +498,6 @@ Done! Outputs saved to: <WORK_DIR>/
 - **Subscribe asset not found:** If `<skill-path>/assets/subscribe_btn_animation_small.mp4`
   is missing, skip the `_yt.mp4` export and tell the user — the asset should be bundled
   with the plugin.
-- **N=1 (band with only 1 studio album):** No crossfade. Copy segment_01.mp4 to assembled.mp4.
-  Subscribe overlay still applied if total_sec > 20.
+- **N=1 (band with only 1 studio album):** No crossfade. Combine segment_01a.mp4 and
+  segment_01b.mp4 with a single 0.3s xfade, or if turntable_sec == 0, copy segment_01a.mp4
+  directly to assembled.mp4. Subscribe overlay still applied if total_sec > 20.
