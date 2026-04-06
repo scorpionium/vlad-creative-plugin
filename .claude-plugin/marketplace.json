@@ -12,7 +12,7 @@
       "name": "vinyl-reel",
       "source": "./plugins/vinyl-reel",
       "description": "Creates polished 9:16 vinyl unboxing reels (YouTube Shorts & Instagram Reels) from raw footage and your own recorded voiceover",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "author": {
         "name": "Пан Володимир"
       },

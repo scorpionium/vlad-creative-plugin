@@ -88,17 +88,20 @@ ffmpeg -y -f concat -safe 0 -i concat_list.txt \
 
 ## Subscribe Overlay (Chromakey)
 
-The subscribe animation has a green screen background. Overlay it on the full assembled
-video at exactly the **20-second mark** using `-itsoffset 20`. The animation plays once
-and stops; `eof_action=pass` ensures the base video continues cleanly afterwards:
+The subscribe animation has a green screen background. Overlay it during the **final 5
+seconds** of the video — where Shorts loop and the end/beginning boundary is a natural
+engagement moment. Compute the offset dynamically from the video duration.
 
 ```bash
 SUBSCRIBE="<working-folder>/subscribe_btn_animation_small.mp4"
 [ ! -f "$SUBSCRIBE" ] && SUBSCRIBE="<skill-path>/assets/subscribe_btn_animation_small.mp4"
 
+VIDEO_DUR=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 assembled_en.mp4)
+OVERLAY_OFFSET=$(python3 -c "print(max(0, float('$VIDEO_DUR') - 5))")
+
 ffmpeg -y \
   -i assembled_en.mp4 \
-  -itsoffset 20 -i "$SUBSCRIBE" \
+  -itsoffset "$OVERLAY_OFFSET" -i "$SUBSCRIBE" \
   -filter_complex " \
     [1:v]chromakey=0x00FF00:0.3:0.1,scale=1080:-1[sub]; \
     [0:v][sub]overlay=(W-w)/2:(H-h)/2:eof_action=pass[out]" \
@@ -109,11 +112,66 @@ ffmpeg -y \
 ```
 
 Key settings:
-- `-itsoffset 20` — delays stream [1] so the animation starts at t=20 in the output
+- `-itsoffset $OVERLAY_OFFSET` — delays stream [1] so the animation starts at final-5s mark
 - `scale=1080:-1` — full width of the video, maintains aspect ratio
 - `overlay=(W-w)/2:(H-h)/2` — centered both horizontally and vertically
 - `chromakey=0x00FF00:0.3:0.1` — green screen removal (similarity=0.3, blend=0.1)
 - `eof_action=pass` — once the animation ends, pass the base video through cleanly
+
+## Hook Text Overlay (0-2s)
+
+Bold scarcity/curiosity text over the opening shot, fades out before voiceover begins.
+Use the most striking fact from research (copy count, colorway uniqueness, resale value).
+
+```bash
+drawtext=fontfile=<bold-font>:text='Only 300 copies worldwide':\
+  fontcolor=white:fontsize=52:\
+  x=(w-text_w)/2:y=(h-text_h)/2:\
+  shadowcolor=black@0.85:shadowx=4:shadowy=4:\
+  enable='between(t,0,2)',\
+drawtext=fontfile=<regular-font>:text='<BAND NAME> — <Album>':\
+  fontcolor=white@0.85:fontsize=34:\
+  x=(w-text_w)/2:y=(h-text_h)/2+65:\
+  shadowcolor=black@0.7:shadowx=3:shadowy=3:\
+  enable='between(t,0,2)'
+```
+
+The hook text occupies the center of the frame (not the bottom) so it reads clearly over
+any background. It disappears at t=2 — before the voiceover enters at t=3.
+
+## Thumbnail Extraction & Composite
+
+Extract candidate frames and generate composites with bold text for YouTube thumbnails.
+
+```bash
+THUMB_DIR="<working-folder>/thumbnails_export"
+mkdir -p "$THUMB_DIR"
+
+# Extract frames at key timestamps (adjust to match actual edit)
+for t in 1 7 30 35 42; do
+  ffmpeg -y -ss $t -i assembled_en.mp4 -vframes 1 -q:v 2 \
+    "$THUMB_DIR/frame_${t}s.jpg" 2>/dev/null
+done
+
+# Generate composite: BAND NAME (large, white) + Album Title (medium, yellow)
+FONT_BOLD="/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
+[ ! -f "$FONT_BOLD" ] && FONT_BOLD="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+
+for frame in "$THUMB_DIR"/frame_*.jpg; do
+  name=$(basename "$frame" .jpg)
+  ffmpeg -y -i "$frame" \
+    -vf "drawtext=fontfile='$FONT_BOLD':text='BAND NAME':fontcolor=white:fontsize=90:\
+x=(w-text_w)/2:y=h-260:shadowcolor=black@0.95:shadowx=5:shadowy=5,\
+drawtext=fontfile='$FONT_BOLD':text='Album Title':fontcolor=yellow:fontsize=58:\
+x=(w-text_w)/2:y=h-160:shadowcolor=black@0.95:shadowx=4:shadowy=4" \
+    "$THUMB_DIR/${name}_composite.jpg" 2>/dev/null
+done
+```
+
+Notes:
+- Replace `BAND NAME` and `Album Title` with actual values before running
+- Best candidates: vinyl reveal (~30s), vinyl against light (~35s), turntable top-down (~42s)
+- Face shots (holding the record) consistently outperform no-face shots for CTR
 
 ## Audio: Sidechain Compression
 
@@ -135,6 +193,10 @@ Parameter explanations:
 - `volume=1.8` — boost voiceover (adjust if recording is louder/quieter)
 - `volume=0.35` — background base level (before ducking)
 - `alimiter=limit=0.95` — prevent clipping
+
+Note: the `mix_audio.sh` script uses a piecewise volume envelope (not sidechain compression)
+with a ducking floor of **22%** during speech — high enough to preserve sonic atmosphere
+while still letting the voice cut through clearly.
 
 ## Audio: Crossfade Samples
 
