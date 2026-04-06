@@ -13,12 +13,16 @@ pickup and wants to share why it matters.
 
 ## Timing
 
-**Target ~30 seconds of spoken text**, with **2-3 pauses of approximately 5 seconds each**
-placed naturally between sections. Total audio including pauses: ~40-50 seconds.
+**Standard mode**: Target ~30 seconds of spoken text, with 2-3 pauses of ~5 seconds each.
+Total audio including pauses: ~40-50 seconds.
 
-The voiceover starts at the **3-second mark** in the video — the opening shot plays
-silently with background music at full volume before the voice comes in. Design the
-hook to feel like it arrives right on cue with the reveal of the cover.
+**Tight-cut mode**: Target ~18-22 seconds of spoken text, with 1-2 pauses of ~4 seconds.
+Total audio including pauses: ~28-35 seconds. Cut ruthlessly — keep only the hook, the
+single most interesting fact, the vinyl reveal, and the closer.
+
+The voiceover starts at the **3-second mark** in the video — the opening shot plays with
+background music at full volume and a text hook overlay for the first 2 seconds. The voice
+arrives at 3s and reinforces what the text hook just set up.
 
 The last ~10 seconds of the reel (turntable / beauty shot) will play with background
 music only — no voiceover needed there.
@@ -28,18 +32,31 @@ Pick the most interesting facts and leave the rest out. Depth over breadth.
 
 ## Structure Template
 
-### 1. Hook (3-5s of speech)
-Open with "here's one from my metal vinyl collection" (or a natural variation), then name
-the artist and album. Include the original language title if applicable.
+**Lead with the rarest or most surprising fact about this pressing — not with the band name
+or album history.** The text overlay in the first 2 seconds already shows a scarcity hook;
+the voiceover must reinforce and expand it, not restart with an introduction.
 
-Example: "Here's one from my metal vinyl collection — Drudkh, Кров у наших криницях, Blood In Our Wells!"
+Use the band popularity signal from Phase 2 research to pick the right opening angle:
+- **Niche band**: Open with curiosity about the band's cult status, then name the pressing fact
+- **Popular band**: Skip band context entirely, open directly with what makes *this pressing* rare
+
+### 1. Hook (3-5s of speech)
+A single surprising statement — the most unusual fact about this specific pressing.
+Do NOT open with "here's one from my collection" (that framing belongs in the text overlay).
+
+**Niche band example**: "This Ukrainian band has been making atmospheric black metal for
+25 years and almost nobody outside Eastern Europe knows they exist."
+
+**Popular band example**: "This exact brown and bone splatter colorway was pressed exactly
+300 times and has never been repressed."
 
 ### [pause — ~5s]
 
 ### 2. Album Significance + Band Context (8-10s of speech)
-This is the most important section. Why does this album matter? What's special about
-the music? Where does it sit in the band's discography? Include cultural or literary
-context if applicable — this is what separates a great voiceover from a generic one.
+Why does this album matter? What's special about the music? Where does it sit in the
+band's discography? Include cultural or literary context if applicable.
+For niche bands: this is where you also say the band name and album title.
+For popular bands: this is where you add depth beyond what fans already know.
 
 Example: "Drudkh's fourth album, 2006 — for many fans, this is THE one. Long hypnotic
 riffs layered with traditional Ukrainian melodies. Lyrics drawn from poetry by Symonenko."

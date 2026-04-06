@@ -5,9 +5,9 @@
 #   - Background music: all samples from audio/ concatenated with 1s crossfades
 #   - Voiceover starts at 3 seconds into the video (3s of music-only intro)
 #   - Background at 100% when no voiceover is speaking (intro + long pauses + tail)
-#   - Background ducked to 10% while voiceover speech is active
+#   - Background ducked to 22% while voiceover speech is active
 #   - Short pauses under 1s stay ducked (background does NOT rise back up)
-#   - Smooth 0.5s ramps between 10% and 100% at every transition
+#   - Smooth 0.5s ramps between 22% and 100% at every transition
 #   - Voiceover always at 100% volume
 #
 # Usage: bash mix_audio.sh <working-folder> <video-duration> <voiceover-path> [output-path]
@@ -98,7 +98,7 @@ import subprocess, re, sys, os
 voiceover = os.environ.get("VO_FILE")
 start_offset = float(os.environ.get("VO_OFFSET", "3.0"))
 transition   = float(os.environ.get("VO_TRANS",  "0.5"))
-low_vol      = 0.1
+low_vol      = 0.22
 high_vol     = 1.0
 
 # Detect silence periods in the trimmed voiceover
@@ -183,7 +183,7 @@ import subprocess, re, sys, os
 voiceover    = os.environ["VO_FILE"]
 start_offset = float(os.environ["VO_OFFSET"])
 transition   = float(os.environ["VO_TRANS"])
-low_vol      = 0.1
+low_vol      = 0.22
 high_vol     = 1.0
 min_pause    = 1.0  # background only rises for pauses longer than this
 

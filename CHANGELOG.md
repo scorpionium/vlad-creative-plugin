@@ -8,6 +8,17 @@
 ### Changed (`discography-reel`) — 0.1.2
 - Subscribe overlay now appears at t=20s (was t=30s); skip-condition updated to `total_sec <= 20`
 
+## [0.3.0] – 2026-04-06
+
+### Changed (`vinyl-reel`) — 0.3.0
+- **Hook rewrite**: opening shot must now be the most visually dramatic clip (vinyl reveal, spinning disc, unwrapping) — not a shelf or cover shot. A bold scarcity/curiosity text overlay (pressing quantity, colorway, resale value) appears for the first 2 seconds before any voiceover.
+- **Voiceover structure**: scripts are now surprise-first / scarcity-first. Opening line must state the most unusual fact about the pressing. "Here's one from my collection" opener is removed from the voice; band popularity signal (niche vs. popular) shapes the hook angle.
+- **Thumbnail generation**: new Phase 5c extracts 5 candidate frames at key timestamps (vinyl reveal, cover, turntable, etc.) and generates composite thumbnails with bold BAND NAME + Album Title overlays saved to `thumbnails_export/`.
+- **Subscribe overlay timing**: moved from t=20s to final 5 seconds (computed dynamically as `video_duration - 5`). Aligns with Shorts loop boundary for better engagement.
+- **Research phase**: Phase 2 now explicitly surfaces scarcity/rarity signals (pressing quantity, colorway name, pressing plant, Discogs resale value) and a band popularity check (Spotify/Last.fm listeners). The single most unusual fact is identified before script writing.
+- **Tight-cut mode**: new optional mode targeting 35-45 seconds (vs. standard 55-59s). Tighter clip selection template and shorter voiceover target (~18-22s speech). Offered to the user during mode selection.
+- **Music ducking floor**: raised from 10% to 22% during voiceover speech — preserves sonic atmosphere while keeping voice intelligible. `mix_audio.sh` `low_vol` updated accordingly.
+
 ## [0.2.0] – 2026-03-16
 
 ### Changed (`vinyl-reel`) — 0.2.0
